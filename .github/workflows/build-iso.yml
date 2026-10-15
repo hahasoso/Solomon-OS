@@ -11,17 +11,22 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out Solomon OS
+        uses: actions/checkout@v4
 
-      - name: Install Debian Live ISO build tools
+      - name: Build with Debian 13
         run: |
-          sudo apt-get update
-          sudo apt-get install -y live-build debootstrap debian-archive-keyring squashfs-tools xorriso isolinux syslinux-common grub-pc-bin grub-efi-amd64-bin
+          docker run --rm --privileged \
+            --volume "$PWD:/workspace" \
+            --workdir /workspace \
+            --env DEBIAN_FRONTEND=noninteractive \
+            debian:trixie bash -e -c '
+              apt-get update
+              apt-get install -y live-build debootstrap debian-archive-keyring squashfs-tools xorriso isolinux syslinux-common grub-pc-bin grub-efi-amd64-bin
+              bash iso/build-iso.sh
+            '
 
-      - name: Build the OS
-        run: sudo bash iso/build-iso.sh
-
-      - name: Attach ISO artifact
+      - name: Upload ISO
         uses: actions/upload-artifact@v4
         with:
           name: SolomonOS-GamingEdition-v0.2
