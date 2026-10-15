@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Solomon OS Gaming Hub
+Comment=Manage games, Steam, emulators and Redder7
+Exec=solomon-hub
+Terminal=false
+Icon=applications-games
+Categories=Game;

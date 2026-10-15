@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Redder7: Training Arena</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{background:#090a10;color:white;font:16px system-ui,Arial;margin:0;min-height:100vh;display:grid;place-items:center;padding:16px}
+main{width:min(920px,100%)}header{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;margin-bottom:12px}
+h1{font-size:clamp(20px,4vw,32px);margin:0;letter-spacing:.02em}h1 span{color:#ff4a40}small{color:#bbb}#hud{display:flex;gap:18px;font-weight:bold;flex-wrap:wrap}
+canvas{display:block;width:100%;aspect-ratio:16/9;background:#191c28;border:2px solid #4c4e62;border-radius:12px}
+footer{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:12px;color:#bbc0cd}
+button{border:0;border-radius:8px;background:#ff514a;color:#180909;padding:12px 16px;font-weight:800;cursor:pointer}
+button:focus-visible{outline:3px solid white;outline-offset:3px}.controls{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:550px){canvas{aspect-ratio:4/3}}
+</style>
+</head>
+<body><main>
+<header><div><h1><span>REDDER7</span> : TRAINING ARENA</h1><small>Original mini-game prototype for Solomon OS · no official assets</small></div><div id="hud"><span id="health">HP 3</span><span id="score">SCORE 0</span><span id="wave">WAVE 1</span></div></header>
+<canvas id="game" width="900" height="506" aria-label="Game arena: move with WASD or arrows, attack with Space"></canvas>
+<footer><span>Move: WASD / arrows &nbsp;·&nbsp; Shoot: Space &nbsp;·&nbsp; Pause: P</span><div class="controls"><button id="start">Start / Restart</button><button id="pause">Pause</button></div></footer>
+</main>
+<script>
+(()=>{
+const c=document.getElementById('game'),ctx=c.getContext('2d');
+const $=id=>document.getElementById(id),W=900,H=506;
+let running=false,paused=false,frame=0,score=0,wave=1,hp=3,bullets=[],enemies=[],particles=[],hero={x:W/2,y:H-85,r:18},keys=new Set(),cooldown=0,last=0;
+function reset(){running=true;paused=false;frame=0;score=0;wave=1;hp=3;bullets=[];enemies=[];particles=[];hero={x:W/2,y:H-85,r:18};cooldown=0;updateHUD();}
+function updateHUD(){$('health').textContent='HP '+hp;$('score').textContent='SCORE '+score;$('wave').textContent='WAVE '+wave;}
+function burst(x,y,color){for(let i=0;i<12;i++){let a=Math.random()*Math.PI*2,sp=1+Math.random()*4;particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:22,color});}}
+function step(){frame++;if(frame%600===0)wave++;const sp=4.7;
+hero.x+=((keys.has('arrowright')||keys.has('d'))?sp:0)-((keys.has('arrowleft')||keys.has('a'))?sp:0);
+hero.y+=((keys.has('arrowdown')||keys.has('s'))?sp:0)-((keys.has('arrowup')||keys.has('w'))?sp:0);
+hero.x=Math.min(W-hero.r,Math.max(hero.r,hero.x));hero.y=Math.min(H-hero.r,Math.max(hero.r,hero.y));
+if(cooldown>0)cooldown--;if(keys.has(' ')&&cooldown<=0){bullets.push({x:hero.x,y:hero.y-17});cooldown=10;}
+let interval=Math.max(18,55-wave*4);if(frame%interval===0)enemies.push({x:22+Math.random()*(W-44),y:-35,r:15+Math.random()*14,spd:1.0+wave*.24+Math.random()*.9});
+for(const b of bullets)b.y-=12;for(const e of enemies)e.y+=e.spd;
+for(const p of particles){p.x+=p.vx;p.y+=p.vy;p.life--;}
+for(const e of enemies){for(const b of bullets){if(Math.hypot(e.x-b.x,e.y-b.y)<e.r+6){e.dead=true;b.dead=true;score+=10;burst(e.x,e.y,'#ffca68');}}if(Math.hypot(e.x-hero.x,e.y-hero.y)<e.r+hero.r){e.dead=true;hp--;burst(hero.x,hero.y,'#ff514a');}if(e.y>H+30)e.dead=true;}
+if(hp<=0){running=false;paused=false;}
+bullets=bullets.filter(b=>!b.dead&&b.y>-15);enemies=enemies.filter(e=>!e.dead);particles=particles.filter(p=>p.life>0);updateHUD();}
+function draw(){ctx.fillStyle='#151824';ctx.fillRect(0,0,W,H);
+ctx.strokeStyle='#262a3a';ctx.lineWidth=1;for(let x=0;x<=W;x+=45){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}for(let y=0;y<=H;y+=45){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+ctx.strokeStyle='#787d90';ctx.lineWidth=2;ctx.strokeRect(15,15,W-30,H-30);
+for(const b of bullets){ctx.fillStyle='#ffbe68';ctx.fillRect(b.x-4,b.y-15,8,20);}
+for(const e of enemies){ctx.beginPath();ctx.fillStyle='#7188c9';ctx.arc(e.x,e.y,e.r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#afc6ff';ctx.lineWidth=3;ctx.stroke();ctx.fillStyle='#d9e7ff';ctx.fillRect(e.x-5,e.y-4,10,6);}
+for(const p of particles){ctx.fillStyle=p.color;ctx.globalAlpha=p.life/22;ctx.fillRect(p.x,p.y,4,4);ctx.globalAlpha=1;}
+ctx.fillStyle='#e83639';ctx.beginPath();ctx.arc(hero.x,hero.y,hero.r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#ff8d89';ctx.lineWidth=3;ctx.stroke();ctx.fillStyle='#fff';ctx.fillRect(hero.x-6,hero.y-6,12,5);
+if(!running||paused){ctx.fillStyle='rgba(4,6,12,.76)';ctx.fillRect(0,0,W,H);ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font='bold 42px system-ui';ctx.fillText(!running?(hp<=0?'GAME OVER':'REDDER7 TRAINING'):'PAUSED',W/2,H/2-12);ctx.font='20px system-ui';ctx.fillStyle='#d4d4dc';ctx.fillText(hp<=0?'Score: '+score+' · Press Start to retry':(!running?'Press Start to play':'Press P or Pause to resume'),W/2,H/2+32);}}
+function loop(ts){const elapsed=Math.min(50,ts-last||16);last=ts;if(running&&!paused&&elapsed>=0)step();draw();requestAnimationFrame(loop);}
+function key(e,on){const k=e.key.toLowerCase();if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();if(on)keys.add(k);else keys.delete(k);if(on&&k==='p'&&e.repeat===false&&running)paused=!paused;}
+window.addEventListener('keydown',e=>key(e,true));window.addEventListener('keyup',e=>key(e,false));window.addEventListener('blur',()=>keys.clear());
+$('start').addEventListener('click',()=>{keys.clear();reset();});$('pause').addEventListener('click',()=>{if(running)paused=!paused;});
+requestAnimationFrame(loop);
+})();
+</script></body></html>

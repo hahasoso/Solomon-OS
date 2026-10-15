@@ -1,0 +1,23 @@
+# A light XFCE desktop, live boot tools, networking and gaming support.
+linux-image-amd64
+live-boot
+live-config
+xfce4
+xfce4-terminal
+lightdm
+lightdm-gtk-greeter
+xserver-xorg
+network-manager
+network-manager-gnome
+firefox-esr
+flatpak
+python3
+python3-tk
+xdg-utils
+ca-certificates
+sudo
+unzip
+zip
+curl
+mesa-vulkan-drivers
+libgl1-mesa-dri
