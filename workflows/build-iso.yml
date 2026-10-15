@@ -1,0 +1,26 @@
+name: Build Solomon OS Gaming Edition ISO
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Debian Live ISO build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y live-build debootstrap debian-archive-keyring squashfs-tools xorriso isolinux syslinux-common grub-pc-bin grub-efi-amd64-bin
+      - name: Build the OS
+        run: sudo bash iso/build-iso.sh
+      - name: Attach ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SolomonOS-GamingEdition-v0.2
+          path: |
+            output/SolomonOS-GamingEdition-v0.2-amd64.iso
+            output/SolomonOS-GamingEdition-v0.2-amd64.iso.sha256
+          compression-level: 0
+          if-no-files-found: error
