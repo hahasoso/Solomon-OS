@@ -1,0 +1,21 @@
+SOLOMON OS GAMING EDITION v0.2
+==============================
+
+THIS ZIP IS A BUILD KIT AND WORKING LINUX GAMING LAUNCHER, NOT A FINISHED ISO.
+The full Linux ISO build requires internet access and was not tested here.
+
+WINDOWS USERS: Upload this folder's contents to a GitHub repo, then open
+Actions > Build Solomon OS Gaming Edition ISO > Run workflow.
+When complete, download the generated ISO artifact from the Actions page.
+
+LINUX USERS (Debian/Ubuntu/Linux Mint): Run "bash setup.sh" to install the hub.
+
+STEAM & FNAF: Install Steam from the launcher; enable Proton inside Steam.
+MARIO & SONIC: Install RetroArch, then use your own legally obtained game files.
+REDDER7: My games > Install Redder7 game > choose the game's .html or .zip,
+or choose "Install demo" to play the included original training game.
+
+The ISO is a temporary LIVE OS, NOT a hard-disk installer.
+Use a normal installed Linux system for persistent game installs.
+
+See README.md for full instructions.
