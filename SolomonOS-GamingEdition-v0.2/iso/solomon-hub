@@ -1,2 +1,0 @@
-#!/bin/sh
-exec python3 /usr/local/share/solomon-os/app/solomon_hub.py "$@"
